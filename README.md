@@ -10,11 +10,11 @@ pip freeze > requirements.txt
 
     "create_user": "api/userprofile/create/",
 
-    "delete_user": "api/userprofile/edit/{user_id}/",
+    "delete_user": "api/userprofile/edit/{user_id}/", method=delete
 
-    "update_user": "api/userprofile/edit/{user_id}/",
+    "update_user": "api/userprofile/edit/{user_id}/", method=put
 
-    "retrieve_user": "api/userprofile/edit/{user_id}/",
+    "retrieve_user": "api/userprofile/edit/{user_id}/", method=get
 
     "user_list": "api/userprofile/list/",
     
