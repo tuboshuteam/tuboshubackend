@@ -63,6 +63,7 @@ class UserCreateUpdateSerializer(ModelSerializer):
         fields = [
             'id',
             'username',
+            'password',
             'email',
             'last_login',
             'date_joined',
@@ -72,6 +73,17 @@ class UserCreateUpdateSerializer(ModelSerializer):
             'last_login',
             'date_joined',
         ]
+        extra_kwargs = {
+            'password': {'write_only': True}
+            }
+
+    # 验证password大于6位
+    def validate_password(self, value):
+        data = self.get_initial()
+        password = data.get('password')
+        if len(password) < 6:
+            raise ValidationError("密码至少6位。")
+        return value
 
     # email数据验证，不允许与已有的email相同
     def validate_email(self, value):
@@ -82,20 +94,27 @@ class UserCreateUpdateSerializer(ModelSerializer):
             raise ValidationError("本邮箱已被注册。")
         return value
 
-    # 更新数据
+    # 更新验证后的数据
     def update(self, instance, validated_data):
-        email = validated_data['email']
-        password = validated_data['password']
-        if email:
+        # 获取email
+        try:
+            email = validated_data['email']
             instance.email = email
-        if password:
+        except:
+            pass
+        # 获取password
+        try:
+            password = validated_data['password']
             instance.set_password(password)
+        except:
+            pass
         instance.save()
         return validated_data
 
 
 # 用户列表
 class UserListSerializer(ModelSerializer):
+    last_login = SerializerMethodField()
     profile = SerializerMethodField()
 
     class Meta:
@@ -109,6 +128,7 @@ class UserListSerializer(ModelSerializer):
             'profile',
         ]
 
+    # 获取Profile表
     def get_profile(self, obj):
         c_qs = Profile.objects.get(user=obj.id)
         profile = UserProfileListSerializer(c_qs).data
