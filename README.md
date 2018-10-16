@@ -18,4 +18,7 @@ pip freeze > requirements.txt
 
     "user_list": "api/userprofile/list/",
     
+    "update_profile": "api/userprofile/edit-profile/{user_id}/", method=put
+    
+    "retrieve_profile": "api/userprofile/edit-profile/{user_id}/", method=get
 ]

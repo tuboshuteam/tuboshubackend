@@ -4,7 +4,6 @@ import time
 # '2015-08-28 16:43:37.283' --> 1440751417.283
 # 或者 '2015-08-28 16:43:37' --> 1440751417.0
 def string2timestamp(strValue):
-    strValue = strValue.replace('T', ' ').replace('+08:00', '')
     try:        
         d = datetime.datetime.strptime(strValue, "%Y-%m-%d %H:%M:%S.%f")
         t = d.timetuple()
