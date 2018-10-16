@@ -22,7 +22,7 @@ class Profile(models.Model):
     # 性别
     gender = models.CharField(max_length=100, blank=True, verbose_name="性别")
     # 生日
-    birthday = models.DateField(null=True, blank=True, verbose_name="生日")
+    birthday = models.DateTimeField(null=True, blank=True, verbose_name="生日")
     # 常住地
     address = models.CharField(max_length=200, blank=True, verbose_name="常住地")
     # avatar

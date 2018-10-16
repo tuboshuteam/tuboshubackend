@@ -9,6 +9,7 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
+    RetrieveUpdateAPIView,
     GenericAPIView,
 )
 
@@ -26,29 +27,48 @@ from django.contrib.auth.models import User
 from .serializers import (
     UserCreateSerializer,
     UserListSerializer,
-    UserCreateUpdateSerializer,
+    UserUpdateSerializer,
+    ProfileUpdateSerializer,
 )
 
+from .models import Profile
 
-# 增
+
+class ProfileUpdateAPIView(RetrieveUpdateAPIView):
+    """
+    查看、更新Profile表
+    """
+    queryset = Profile
+    serializer_class = ProfileUpdateSerializer
+    lookup_field = 'user'
+
+
 class UserCreateAPIView(CreateAPIView):
+    """
+    新建User表
+    对应的Profile会自动创建并关联
+    """
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
 
 
-# 删改查
 class UserUpdateAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    User表的删除、更新、查看
+    对应http请求的delete/put/get方法
+    """
     queryset = User.objects.all()
-    serializer_class = UserCreateUpdateSerializer
+    serializer_class = UserUpdateSerializer
 
     # 允许PUT方法的部分字段修改
     def put(self, request, *args, **kwargs):
-        print("partile_update")
         return self.partial_update(request, *args, **kwargs)
 
 
-# 列表
 class UserListAPIView(ListAPIView):
+    """
+    User表的查看
+    """
     serializer_class = UserListSerializer
 
     def get_queryset(self, *args, **kwargs):
