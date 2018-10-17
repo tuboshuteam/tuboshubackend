@@ -33,20 +33,20 @@ class ProfileUpdateSerializer(ModelSerializer):
             'level',
         ]
 
-    def validate_phone(self, value):
-        data = self.get_initial()
-        phone = data.get('phone')
-        if len(phone) != 11 or not phone.isdigit():
-            raise ValidationError("请输入11位电话号码.")
-        return value
+    # def validate_phone(self, value):
+    #     data = self.get_initial()
+    #     phone = data.get('phone')
+    #     if len(phone) != 11 or not phone.isdigit():
+    #         raise ValidationError("请输入11位电话号码.")
+    #     return value
 
-    def validate_gender(self, value):
-        data = self.get_initial()
-        gender = data.get('gender')
-        gender_list = ['男', '女']
-        if gender not in gender_list:
-            raise ValidationError("性别必须为'男'或'女'")
-        return value
+    # def validate_gender(self, value):
+    #     data = self.get_initial()
+    #     gender = data.get('gender')
+    #     gender_list = ['男', '女']
+    #     if gender not in gender_list:
+    #         raise ValidationError("性别必须为'男'或'女'")
+    #     return value
 
 
 class ProfileListSerializer(ModelSerializer):
@@ -105,14 +105,14 @@ class UserCreateSerializer(ModelSerializer):
         return validated_data
 
 
-# 改User表
 class UserUpdateSerializer(ModelSerializer):
     """
     User表的查看、更新、删除
     并对其验证
     """
-    date_joined = TimestampField()
-    last_login = TimestampField()
+    date_joined = TimestampField(read_only=True)
+    last_login = TimestampField(read_only=True)
+    profile = ProfileUpdateSerializer()
 
     class Meta:
         model = User
@@ -123,15 +123,17 @@ class UserUpdateSerializer(ModelSerializer):
             'email',
             'last_login',
             'date_joined',
+            'profile',
         ]
         read_only_fields = [
             'username',
-            'last_login',
-            'date_joined',
         ]
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    def validate(self, data):
+        return data
 
     # 验证password是否合法
     def validate_password(self, value):
@@ -150,8 +152,22 @@ class UserUpdateSerializer(ModelSerializer):
             raise ValidationError("本邮箱已被注册。")
         return value
 
+    def validate_profile(self, value):
+        return value
+
     # 更新验证后的数据
     def update(self, instance, validated_data):
+        data = self.get_initial()
+        o = data.get('email')
+        print(o)
+        obj = data.get('profile')
+        print(obj)
+        if obj:
+            profile_data = validated_data.pop('profile')
+            profile = Profile.objects.get(id=instance.id)
+            profile.user = instance
+            profile.phone = profile_data['phone']
+            profile.save()
         # 获取email
         try:
             email = validated_data['email']
@@ -165,7 +181,7 @@ class UserUpdateSerializer(ModelSerializer):
         except:
             pass
         instance.save()
-        return validated_data
+        return instance
 
 
 # 用户列表
