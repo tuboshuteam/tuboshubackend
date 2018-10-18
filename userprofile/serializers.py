@@ -12,63 +12,6 @@ from .models import Profile
 from .fields import TimestampField
 
 
-class ProfileUpdateSerializer(ModelSerializer):
-    """
-    Profile表的查看、更新
-    Profile表必须通过User表才能删除
-    并对其验证
-    """
-    birthday = TimestampField(required=False)
-
-    class Meta:
-        model = Profile
-        fields = [
-            'phone',
-            'gender',
-            'birthday',
-            'address',
-            'avatar',
-            'bio',
-            'tags',
-            'level',
-        ]
-
-    # def validate_phone(self, value):
-    #     data = self.get_initial()
-    #     phone = data.get('phone')
-    #     if len(phone) != 11 or not phone.isdigit():
-    #         raise ValidationError("请输入11位电话号码.")
-    #     return value
-
-    # def validate_gender(self, value):
-    #     data = self.get_initial()
-    #     gender = data.get('gender')
-    #     gender_list = ['男', '女']
-    #     if gender not in gender_list:
-    #         raise ValidationError("性别必须为'男'或'女'")
-    #     return value
-
-
-class ProfileListSerializer(ModelSerializer):
-    """
-    序列化Profile列表，与User表一对一
-    """
-    birthday = TimestampField()
-
-    class Meta:
-        model = Profile
-        fields = [
-            'phone',
-            'gender',
-            'birthday',
-            'address',
-            'avatar',
-            'bio',
-            'tags',
-            'level',
-        ]
-
-
 class UserCreateSerializer(ModelSerializer):
     """
     序列化新的User表
@@ -94,6 +37,7 @@ class UserCreateSerializer(ModelSerializer):
             raise ValidationError("密码至少6位。")
         return value
 
+    # 创建新的模型
     def create(self, validated_data):
         username = validated_data['username']
         password = validated_data['password']
@@ -103,6 +47,40 @@ class UserCreateSerializer(ModelSerializer):
         user_obj.set_password(password)
         user_obj.save()
         return validated_data
+
+
+class ProfileUpdateSerializer(ModelSerializer):
+    """
+    Profile表的查看、更新
+    Profile表必须通过User表才能删除
+    并对其验证
+    """
+    birthday = TimestampField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = [
+            'phone',
+            'gender',
+            'birthday',
+            'address',
+            'avatar',
+            'bio',
+            'tags',
+            'level',
+        ]
+
+    # 验证电话号码是否合法
+    def validate_phone(self, value):
+        if len(value) != 11 or not value.isdigit():
+            raise ValidationError("请输入11位电话号码.")
+        return value
+
+    def validate_gender(self, value):
+        gender_list = ['男', '女']
+        if value not in gender_list:
+            raise ValidationError("性别必须为'男'或'女'")
+        return value
 
 
 class UserUpdateSerializer(ModelSerializer):
@@ -132,9 +110,6 @@ class UserUpdateSerializer(ModelSerializer):
             'password': {'write_only': True}
         }
 
-    def validate(self, data):
-        return data
-
     # 验证password是否合法
     def validate_password(self, value):
         data = self.get_initial()
@@ -152,40 +127,69 @@ class UserUpdateSerializer(ModelSerializer):
             raise ValidationError("本邮箱已被注册。")
         return value
 
-    def validate_profile(self, value):
-        return value
-
-    # 更新验证后的数据
     def update(self, instance, validated_data):
-        data = self.get_initial()
-        o = data.get('email')
-        print(o)
-        obj = data.get('profile')
-        print(obj)
-        if obj:
-            profile_data = validated_data.pop('profile')
-            profile = Profile.objects.get(id=instance.id)
-            profile.user = instance
+        """
+        更新User表、Profile表的数据
+        :param instance: 待更新的模型实例
+        :param validated_data: 用户提交的数据
+        :return: 模型实例
+        """
+        # 更新Profile数据
+        profile_data = validated_data.pop('profile')
+        profile = Profile.objects.get(id=instance.id)
+        profile.user = instance
+        # 循环查找数据更新
+        if 'phone' in profile_data:
             profile.phone = profile_data['phone']
-            profile.save()
-        # 获取email
-        try:
-            email = validated_data['email']
-            instance.email = email
-        except:
-            pass
-        # 获取password
-        try:
-            password = validated_data['password']
-            instance.set_password(password)
-        except:
-            pass
+        if 'gender' in profile_data:
+            profile.gender = profile_data['gender']
+        if 'birthday' in profile_data:
+            profile.birthday = profile_data['birthday']
+        if 'address' in profile_data:
+            profile.address = profile_data['address']
+        if 'bio' in profile_data:
+            profile.bio = profile_data['bio']
+        if 'tags' in profile_data:
+            profile.tags = profile_data['tags']
+
+        profile.save()
+
+        # 更新User数据
+        if 'email' in validated_data:
+            instance.email = validated_data['email']
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
         instance.save()
         return instance
 
 
-# 用户列表
+class ProfileListSerializer(ModelSerializer):
+    """
+    序列化Profile列表，与User表一对一关联
+    """
+    birthday = TimestampField()
+
+    class Meta:
+        model = Profile
+        fields = [
+            'phone',
+            'gender',
+            'birthday',
+            'address',
+            'avatar',
+            'bio',
+            'tags',
+            'level',
+        ]
+
+
 class UserListSerializer(ModelSerializer):
+    """
+    User用户列表
+    含有拓展的Profile用户数据列表
+    """
+    url = HyperlinkedIdentityField(view_name="userprofile:detail")
+
     profile = SerializerMethodField()
     date_joined = TimestampField()
     last_login = TimestampField()
@@ -193,6 +197,7 @@ class UserListSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'url',
             'id',
             'username',
             'email',
