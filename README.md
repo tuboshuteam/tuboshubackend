@@ -18,4 +18,9 @@ pip freeze > requirements.txt
 
     "user_list": "api/userprofile/list/",
     
+    "retrive_post": "api/post/edit/{post_id}/", method=get
+    
+    "post_list": "api/post/list/",
+    
+    
 ]

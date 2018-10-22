@@ -38,7 +38,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
+    # 用户数据
     'userprofile',
+    # 文章
+    'post',
 ]
 
 MIDDLEWARE = [

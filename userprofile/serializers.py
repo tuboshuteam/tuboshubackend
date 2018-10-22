@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from .models import Profile
 from .fields import TimestampField
 
+from post.serializers import PostDetailSerializer
+
 
 class UserCreateSerializer(ModelSerializer):
     """
@@ -49,7 +51,7 @@ class UserCreateSerializer(ModelSerializer):
         return validated_data
 
 
-class ProfileUpdateSerializer(ModelSerializer):
+class ProfileDetailSerializer(ModelSerializer):
     """
     Profile表的查看、更新
     Profile表必须通过User表才能删除
@@ -83,14 +85,14 @@ class ProfileUpdateSerializer(ModelSerializer):
         return value
 
 
-class UserUpdateSerializer(ModelSerializer):
+class UserDetailSerializer(ModelSerializer):
     """
     User表的查看、更新、删除
     并对其验证
     """
     date_joined = TimestampField(read_only=True)
     last_login = TimestampField(read_only=True)
-    profile = ProfileUpdateSerializer()
+    profile = ProfileDetailSerializer()
 
     class Meta:
         model = User
@@ -135,24 +137,24 @@ class UserUpdateSerializer(ModelSerializer):
         :return: 模型实例
         """
         # 更新Profile数据
-        profile_data = validated_data.pop('profile')
-        profile = Profile.objects.get(id=instance.id)
-        profile.user = instance
-        # 循环查找数据更新
-        if 'phone' in profile_data:
-            profile.phone = profile_data['phone']
-        if 'gender' in profile_data:
-            profile.gender = profile_data['gender']
-        if 'birthday' in profile_data:
-            profile.birthday = profile_data['birthday']
-        if 'address' in profile_data:
-            profile.address = profile_data['address']
-        if 'bio' in profile_data:
-            profile.bio = profile_data['bio']
-        if 'tags' in profile_data:
-            profile.tags = profile_data['tags']
-
-        profile.save()
+        if 'profile' in validated_data:
+            profile_data = validated_data.pop('profile')
+            profile = Profile.objects.get(id=instance.id)
+            profile.user = instance
+            # 循环查找数据更新
+            if 'phone' in profile_data:
+                profile.phone = profile_data['phone']
+            if 'gender' in profile_data:
+                profile.gender = profile_data['gender']
+            if 'birthday' in profile_data:
+                profile.birthday = profile_data['birthday']
+            if 'address' in profile_data:
+                profile.address = profile_data['address']
+            if 'bio' in profile_data:
+                profile.bio = profile_data['bio']
+            if 'tags' in profile_data:
+                profile.tags = profile_data['tags']
+            profile.save()
 
         # 更新User数据
         if 'email' in validated_data:
@@ -193,6 +195,7 @@ class UserListSerializer(ModelSerializer):
     profile = SerializerMethodField()
     date_joined = TimestampField()
     last_login = TimestampField()
+
 
     class Meta:
         model = User
