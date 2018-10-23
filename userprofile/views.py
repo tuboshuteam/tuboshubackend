@@ -67,7 +67,7 @@ class UserUpdateAPIView(RetrieveUpdateDestroyAPIView):
 
 class UserListAPIView(ListAPIView):
     """
-    User表的查看
+    查看User表
     """
     serializer_class = UserListSerializer
 
