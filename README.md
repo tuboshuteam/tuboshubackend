@@ -18,4 +18,13 @@ pip freeze > requirements.txt
 
     "user_list": "api/userprofile/list/",
     
+    "retrive_post": "api/post/edit/{post_id}/", method=get
+    
+    "delete_post": "api/post/edit/{post_id}/", method=delete
+
+    "update_post": "api/post/edit/{post_id}/", method=put
+    
+    "post_list": "api/post/list/",
+    
+    
 ]

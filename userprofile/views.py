@@ -27,8 +27,8 @@ from django.contrib.auth.models import User
 from .serializers import (
     UserCreateSerializer,
     UserListSerializer,
-    UserUpdateSerializer,
-    ProfileUpdateSerializer,
+    UserDetailSerializer,
+    ProfileDetailSerializer,
 )
 
 from .models import Profile
@@ -39,7 +39,7 @@ class ProfileUpdateAPIView(RetrieveUpdateAPIView):
     查看、更新Profile表
     """
     queryset = Profile
-    serializer_class = ProfileUpdateSerializer
+    serializer_class = ProfileDetailSerializer
     lookup_field = 'user'
 
 
@@ -58,7 +58,7 @@ class UserUpdateAPIView(RetrieveUpdateDestroyAPIView):
     对应http请求的delete/put/get方法
     """
     queryset = User.objects.all()
-    serializer_class = UserUpdateSerializer
+    serializer_class = UserDetailSerializer
 
     # 允许PUT方法的部分字段修改
     def put(self, request, *args, **kwargs):
@@ -67,7 +67,7 @@ class UserUpdateAPIView(RetrieveUpdateDestroyAPIView):
 
 class UserListAPIView(ListAPIView):
     """
-    User表的查看
+    查看User表
     """
     serializer_class = UserListSerializer
 

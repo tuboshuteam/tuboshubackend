@@ -7,8 +7,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # django-restful-framework
     path('api-auth/', include('rest_framework.urls')),
+
     # api
     path('api/userprofile/', include('userprofile.urls', namespace='userprofile')),
+    path('api/post/', include('post.urls', namespace='post')),
 ]
 
 # 媒体文件地址

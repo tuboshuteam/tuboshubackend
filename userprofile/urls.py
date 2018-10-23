@@ -11,6 +11,4 @@ urlpatterns = [
     path('edit/<int:pk>/', views.UserUpdateAPIView.as_view(), name='detail'),
     # User列表
     path('list/', views.UserListAPIView.as_view(), name='list'),
-    # 删改Profile
-    path('edit-profile/<int:user>/', views.ProfileUpdateAPIView.as_view(), name='p_detail'),
 ]

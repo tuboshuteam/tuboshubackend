@@ -11,12 +11,17 @@ from django.core.exceptions import ValidationError
 from .models import Profile
 from .fields import TimestampField
 
+from post.serializers import (
+    PostDetailSerializer,
+    PostSimpleDetailSerializer,
+)
+
 
 class UserCreateSerializer(ModelSerializer):
     """
     序列化新的User表
     必须的字段：username 用户名；password 密码
-    并对其进行验证
+    并对数据进行验证、保存
     """
 
     class Meta:
@@ -29,7 +34,7 @@ class UserCreateSerializer(ModelSerializer):
                             {"write_only": True}
                         }
 
-    # 验证password大于6位
+    # 验证password是否大于6位
     def validate_password(self, value):
         data = self.get_initial()
         password = data.get('password')
@@ -49,11 +54,11 @@ class UserCreateSerializer(ModelSerializer):
         return validated_data
 
 
-class ProfileUpdateSerializer(ModelSerializer):
+class ProfileDetailSerializer(ModelSerializer):
     """
     Profile表的查看、更新
     Profile表必须通过User表才能删除
-    并对其验证
+    并对数据验证
     """
     birthday = TimestampField(required=False)
 
@@ -76,6 +81,7 @@ class ProfileUpdateSerializer(ModelSerializer):
             raise ValidationError("请输入11位电话号码.")
         return value
 
+    # 验证性别是否正确
     def validate_gender(self, value):
         gender_list = ['男', '女']
         if value not in gender_list:
@@ -83,14 +89,14 @@ class ProfileUpdateSerializer(ModelSerializer):
         return value
 
 
-class UserUpdateSerializer(ModelSerializer):
+class UserDetailSerializer(ModelSerializer):
     """
     User表的查看、更新、删除
-    并对其验证
     """
     date_joined = TimestampField(read_only=True)
     last_login = TimestampField(read_only=True)
-    profile = ProfileUpdateSerializer()
+    profile = ProfileDetailSerializer()
+    post = PostSimpleDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -102,6 +108,7 @@ class UserUpdateSerializer(ModelSerializer):
             'last_login',
             'date_joined',
             'profile',
+            'post',
         ]
         read_only_fields = [
             'username',
@@ -134,25 +141,26 @@ class UserUpdateSerializer(ModelSerializer):
         :param validated_data: 用户提交的数据
         :return: 模型实例
         """
-        # 更新Profile数据
-        profile_data = validated_data.pop('profile')
-        profile = Profile.objects.get(id=instance.id)
-        profile.user = instance
-        # 循环查找数据更新
-        if 'phone' in profile_data:
-            profile.phone = profile_data['phone']
-        if 'gender' in profile_data:
-            profile.gender = profile_data['gender']
-        if 'birthday' in profile_data:
-            profile.birthday = profile_data['birthday']
-        if 'address' in profile_data:
-            profile.address = profile_data['address']
-        if 'bio' in profile_data:
-            profile.bio = profile_data['bio']
-        if 'tags' in profile_data:
-            profile.tags = profile_data['tags']
 
-        profile.save()
+        # 更新Profile数据
+        if 'profile' in validated_data:
+            profile_data = validated_data.pop('profile')
+            profile = Profile.objects.get(id=instance.id)
+            profile.user = instance
+            # 循环检查数据更新
+            if 'phone' in profile_data:
+                profile.phone = profile_data['phone']
+            if 'gender' in profile_data:
+                profile.gender = profile_data['gender']
+            if 'birthday' in profile_data:
+                profile.birthday = profile_data['birthday']
+            if 'address' in profile_data:
+                profile.address = profile_data['address']
+            if 'bio' in profile_data:
+                profile.bio = profile_data['bio']
+            if 'tags' in profile_data:
+                profile.tags = profile_data['tags']
+            profile.save()
 
         # 更新User数据
         if 'email' in validated_data:
