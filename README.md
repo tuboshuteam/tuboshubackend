@@ -8,7 +8,7 @@ pip freeze > requirements.txt
 
 [
 
-    "create_user": "api/userprofile/create/",
+    "create_user": "api/userprofile/create/", method=post
 
     "delete_user": "api/userprofile/edit/{user_id}/", method=delete
 
@@ -17,6 +17,10 @@ pip freeze > requirements.txt
     "retrieve_user": "api/userprofile/edit/{user_id}/", method=get
 
     "user_list": "api/userprofile/list/",
+    
+    
+    
+    "create_post": "api/post/create/", method=post
     
     "retrive_post": "api/post/edit/{post_id}/", method=get
     
@@ -27,4 +31,14 @@ pip freeze > requirements.txt
     "post_list": "api/post/list/",
     
     
+    
+    "create_point": "api/point/create/", method=post
+    
+    "retrive_point": "api/point/edit/{point_id}/", method=get
+    
+    "delete_point": "api/point/edit/{point_id}/", method=delete
+
+    "update_point": "api/point/edit/{point_id}/", method=put
+    
+    "point_list": "api/point/list/",
 ]
