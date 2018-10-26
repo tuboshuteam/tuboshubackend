@@ -11,6 +11,8 @@ urlpatterns = [
     # api
     path('api/userprofile/', include('userprofile.urls', namespace='userprofile')),
     path('api/post/', include('post.urls', namespace='post')),
+    path('api/point/', include('point.urls', namespace='point')),
+    path('api/comment/', include('comment.urls', namespace='comment')),
 ]
 
 # 媒体文件地址

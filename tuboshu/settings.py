@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'userprofile',
     # 文章
     'post',
+    # Point数据
+    'point',
+    # 回复
+    'comment',
 ]
 
 MIDDLEWARE = [

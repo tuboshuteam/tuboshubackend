@@ -9,11 +9,11 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from .models import Profile
-from .fields import TimestampField
+from utils.fields import TimestampField
 
 from post.serializers import (
     PostDetailSerializer,
-    PostSimpleDetailSerializer,
+    PostUserSerializer,
 )
 
 
@@ -96,7 +96,7 @@ class UserDetailSerializer(ModelSerializer):
     date_joined = TimestampField(read_only=True)
     last_login = TimestampField(read_only=True)
     profile = ProfileDetailSerializer()
-    post = PostSimpleDetailSerializer(many=True, read_only=True)
+    post = PostUserSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
