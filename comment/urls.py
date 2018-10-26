@@ -5,9 +5,9 @@ app_name = 'comment'
 
 urlpatterns = [
     # 增
-    # path('create/', views.PostCreateAPIView.as_view(), name='create'),
+    path('create/', views.CommentCreateAPIView.as_view(), name='create'),
     # 删改查
-    # path('edit/<int:pk>/', views.PostDetailAPIView.as_view(), name='detail'),
+    path('edit/<int:pk>/', views.CommentDetailAPIView.as_view(), name='detail'),
     # Post列表
     path('list/', views.CommentListAPIView.as_view(), name='list'),
 ]

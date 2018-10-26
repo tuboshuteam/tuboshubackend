@@ -9,8 +9,8 @@ class Comment(models.Model):
     """
     评论model
     """
-    post = models.ForeignKey(Post, models.CASCADE)
-    user = models.ForeignKey(User, models.CASCADE)
+    post = models.ForeignKey(Post, models.CASCADE, related_name='comment')
+    user = models.ForeignKey(User, models.CASCADE, related_name='comment')
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 

@@ -10,9 +10,10 @@ from django.core.exceptions import ValidationError
 
 from .models import Post
 
-from userprofile.fields import TimestampField
+from utils.fields import TimestampField
 from point.serializers import PointDetailSerializer
 from point.models import Point
+from comment.serializers import CommentPostSerializer
 
 
 class PostCreateSerializer(ModelSerializer):
@@ -123,6 +124,7 @@ class PostDetailSerializer(ModelSerializer):
     updated = TimestampField(read_only=True)
     user_name = SerializerMethodField()
     point = PointDetailSerializer(many=True, read_only=True)
+    comment = CommentPostSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -136,6 +138,7 @@ class PostDetailSerializer(ModelSerializer):
             'updated',
             'content',
             'point',
+            'comment',
         ]
         read_only_fields = [
             'id',
@@ -218,7 +221,7 @@ class PostListSerializer(ModelSerializer):
         return obj.user.username
 
 
-class PostSimpleDetailSerializer(ModelSerializer):
+class PostUserSerializer(ModelSerializer):
     """
     提供给UserDetailSerializer连接的简易Detail
     """
