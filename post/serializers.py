@@ -8,7 +8,6 @@ from rest_framework.serializers import (
 
 from django.core.exceptions import ValidationError
 
-
 from .models import Post
 
 from userprofile.fields import TimestampField
@@ -150,6 +149,8 @@ class PostDetailSerializer(ModelSerializer):
     def get_user_name(self, obj):
         return obj.user.username
 
+    # 重写update方法
+    # 可以从这里更新相关的Point表了
     def update(self, instance, validated_data):
         request = self.context.get("request")
         if request.data.get("point"):
