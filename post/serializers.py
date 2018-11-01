@@ -231,5 +231,10 @@ class PostUserSerializer(ModelSerializer):
         model = Post
         fields = [
             'url',
+            'id',
             'title',
+            'views',
+            'created',
+            'updated',
+            'content',
         ]
