@@ -50,6 +50,7 @@ class PostCreateSerializer(ModelSerializer):
         fields = [
             'title',
             'content',
+            'location',
         ]
 
     def get_user(self, obj):
@@ -57,8 +58,8 @@ class PostCreateSerializer(ModelSerializer):
 
     # 创建新的模型
     def create(self, validated_data):
-        title = validated_data['title']
-        content = validated_data['content']
+        # title = validated_data['title']
+        # content = validated_data['content']
 
         # 获取request.user
         user = None
@@ -68,8 +69,7 @@ class PostCreateSerializer(ModelSerializer):
         # 赋值并保存
         post_obj = Post(
             user=user,
-            title=title,
-            content=content
+            **validated_data,
         )
         post_obj.save()
 
@@ -90,30 +90,33 @@ class PostDetailSerializer(ModelSerializer):
     "title": str,
     "content": str,
     ...
-    point: [
-            # 创建新Point
-            {
-                "method": "create",
-                "longitude": num,
-                "latitude": num,
-                "travel_date_time": num,
+    point: {
+            "create": [
+                {
+                    "latitude": num,
+                    "longitude": num,
+                    ...
+                },
                 ...
-            },
-            # 删除id为"id"的Point
-            {
-                "method": "delete",
-                "id": num,
-            },
-            # 更新id为"id"的Point
-            {
-                "method": "update",
-                "id": num,
-                "longitude": num,
-                "latitude": num,
-                "travel_date_time": num,
+            ],
+
+            "delete": [
+                {
+                    "id": num,
+                },
                 ...
-            },
-        ]
+            ]
+
+            "update": [
+                {
+                    "id": num,
+                    "latitude": num,
+                    "longitude": num,
+                    ...
+                },
+                ...
+            ]
+        }
     }
     """
     user = HyperlinkedRelatedField(
@@ -134,6 +137,7 @@ class PostDetailSerializer(ModelSerializer):
             'user_name',
             'title',
             'views',
+            'location',
             'created',
             'updated',
             'content',
@@ -159,33 +163,56 @@ class PostDetailSerializer(ModelSerializer):
         if request.data.get("point"):
             # print(request.data.get("point"))
             # 遍历point数组，对Point表进行更新、创建、删除
-            for p_dict in request.data.get("point"):
-                method = p_dict['method']
-                del p_dict['method']
+            for method, point_objs in request.data.get("point").items():
+                if method == 'create':
+                    for point_obj in point_objs:
+                        point_obj['post'] = instance
+                        Point.objects.create(**point_obj)
 
-                # 如果method元素为create，则创建一个新的Point
-                if method == "create":
-                    p_dict['post'] = instance
-                    Point.objects.create(**p_dict)
-
-                # method为update，则更新现有的Point
                 elif method == 'update':
-                    point_obj = Point.objects.get(id=p_dict['id'])
-                    del p_dict['id']
-                    for key, value in p_dict.items():
-                        setattr(point_obj, key, value)
-                    point_obj.save()
+                    for point_obj in point_objs:
+                        point = Point.objects.get(id=point_obj['id'])
+                        del point_obj['id']
+                        for key, value in point_obj.items():
+                            setattr(point, key, value)
+                        point.save()
 
-                # method为delete，则删除Point
                 elif method == 'delete':
-                    point_obj = Point.objects.get(id=p_dict['id'])
-                    point_obj.delete()
+                    for point_obj in point_objs:
+                        point = Point.objects.get(id=point_obj['id'])
+                        point.delete()
 
                 else:
                     raise ValidationError("method必须为create/update/delete")
+
+            # for p_dict in request.data.get("point"):
+            #     method = p_dict['method']
+            #     del p_dict['method']
+            #
+            #     # 如果method元素为create，则创建一个新的Point
+            #     if method == "create":
+            #         p_dict['post'] = instance
+            #         Point.objects.create(**p_dict)
+            #
+            #     # method为update，则更新现有的Point
+            #     elif method == 'update':
+            #         point_obj = Point.objects.get(id=p_dict['id'])
+            #         del p_dict['id']
+            #         for key, value in p_dict.items():
+            #             setattr(point_obj, key, value)
+            #         point_obj.save()
+            #
+            #     # method为delete，则删除Point
+            #     elif method == 'delete':
+            #         point_obj = Point.objects.get(id=p_dict['id'])
+            #         point_obj.delete()
+            #
+            #     else:
+            #         raise ValidationError("method必须为create/update/delete")
         # 更新Post内容
         instance.title = validated_data.get('title', instance.title)
         instance.content = validated_data.get('content', instance.content)
+        instance.location = validated_data.get('location', instance.location)
         instance.save()
         return instance
 
@@ -203,6 +230,7 @@ class PostListSerializer(ModelSerializer):
     created = TimestampField(read_only=True)
     updated = TimestampField(read_only=True)
     user_name = SerializerMethodField()
+    point = PointDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -212,9 +240,11 @@ class PostListSerializer(ModelSerializer):
             'user',
             'user_name',
             'title',
+            'location',
             'views',
             'created',
             'updated',
+            'point',
         ]
 
     def get_user_name(self, obj):

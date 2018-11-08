@@ -11,7 +11,7 @@ class Point(models.Model):
     # 纬度
     latitude = models.FloatField()
     # Point起始时间
-    travel_date_time = models.DateTimeField()
+    travel_date_time = models.DateTimeField(blank=True, null=True)
     # Point名称
     name = models.TextField(blank=True)
     # 花销
