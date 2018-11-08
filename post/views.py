@@ -6,6 +6,11 @@ from rest_framework.generics import (
     GenericAPIView,
 )
 
+from rest_framework.filters import (
+    SearchFilter,
+    OrderingFilter,
+)
+
 from .serializers import (
     PostListSerializer,
     PostDetailSerializer,
@@ -49,6 +54,8 @@ class PostListAPIView(ListAPIView):
     Post列表
     """
     serializer_class = PostListSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['location', 'title',]
 
     def get_queryset(self, *args, **kwargs):
         queryset_list = Post.objects.all()

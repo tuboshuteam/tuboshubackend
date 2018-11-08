@@ -74,6 +74,9 @@ class ProfileDetailSerializer(ModelSerializer):
             'tags',
             'level',
         ]
+        read_only_fields = [
+            'level',
+        ]
 
     # 验证电话号码是否合法
     def validate_phone(self, value):
@@ -148,18 +151,8 @@ class UserDetailSerializer(ModelSerializer):
             profile = Profile.objects.get(id=instance.id)
             profile.user = instance
             # 循环检查数据更新
-            if 'phone' in profile_data:
-                profile.phone = profile_data['phone']
-            if 'gender' in profile_data:
-                profile.gender = profile_data['gender']
-            if 'birthday' in profile_data:
-                profile.birthday = profile_data['birthday']
-            if 'address' in profile_data:
-                profile.address = profile_data['address']
-            if 'bio' in profile_data:
-                profile.bio = profile_data['bio']
-            if 'tags' in profile_data:
-                profile.tags = profile_data['tags']
+            for key, value in profile_data.items():
+                setattr(profile, key, value)
             profile.save()
 
         # 更新User数据

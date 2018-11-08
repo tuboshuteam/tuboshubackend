@@ -8,6 +8,8 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post')
     title = models.CharField(max_length=100)
     views = models.PositiveIntegerField(default=0)
+    location = models.CharField(max_length=100)
+
     # collection
     # forward
     # like
